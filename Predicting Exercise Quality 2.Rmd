@@ -72,21 +72,6 @@ pcaTrain <- predict(pcaProc, centeredTrain)
 imputedTest <- predict(imputeProc,cleanTest[,-144])
 centeredTest <- predict(centerProc, imputedTest)
 pcaTest <- predict(pcaProc, centeredTest)
-
-ptmnb <- proc.time()
-modelFitnb <- train(cleanTrain$classe ~ ., method='nb', data=pcaTrain)
-timenb <- proc.time() - ptmnb
-cMnb <- confusionMatrix(cleanTest$classe,predict(modelFitnb,pcaTest))
-
-ptmlda <- proc.time()
-modelFitlda <- train(cleanTrain$classe ~ ., method='lda', data=pcaTrain)
-timelda <- proc.time() - ptmlda
-cMlda <- confusionMatrix(cleanTest$classe,predict(modelFitlda,pcaTest))
-
-ptmgbm <- proc.time()
-modelFitgbm <- train(cleanTrain$classe ~ ., method='gbm', data=pcaTrain, verbose = FALSE)
-timegbm <- proc.time() - ptmgbm
-cMgbm <- confusionMatrix(cleanTest$classe,predict(modelFitgbm,pcaTest))
 ```
 
 
@@ -115,32 +100,6 @@ The resulting training data that will be used is:
 pcaProc
 ```
 
-
-```{r, echo= FALSE}
-ptmrf <- proc.time()
-modelFitrf <- train(cleanTrain$classe ~ ., method='rf', data=pcaTrain, prox = TRUE)
-timerf <- proc.time() - ptmrf
-cMrf <- confusionMatrix(cleanTest$classe,predict(modelFitrf,pcaTest))
-
-fileUrl2 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
-if(!file.exists("testing.csv")){
-    download.file(fileUrl2,destfile="testing.csv",method="curl")
-}
-
-dateDownloaded2 <- date()
-dateDownloaded2
-problem = read.csv("testing.csv", na.strings = c("NA","","#DIV/0!"))
-
-cleanProblem <- problem[,8:159]
-cleanProblem <- cleanProblem[,!(names(cleanProblem) %in% drops)]
-imputedProblem <- predict(imputeProc,cleanProblem)
-centeredProblem <- predict(centerProc, imputedProblem)
-pcaProblem <- predict(pcaProc, centeredProblem)
-
-answers <- predict(modelFitrf,pcaProblem)
-```
-
-
 Training
 
 Four methods were used to train the data:
@@ -153,11 +112,5 @@ The resulting model from these methods were used to predict the classe for the t
 
 The accuracy of the methods/models were used to determine goodness of fit of the models.
 
-```{r, echo=TRUE}
-cMnb
-cMrf
-cMgbm
-cMlda
-```
 
 Random Forest generated the highest accuracy of 92% for the testing data set. This method and its generated model was used to predict the classe of the 20 problem records. 19 of the 20 observations were predicted correctly. 
